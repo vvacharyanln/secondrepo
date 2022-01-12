@@ -1,0 +1,47 @@
+{"properties": [
+  {
+    "name": "PCTime.atZone(ZoneId.systemDefault())",
+    "type": "java.lang.String",
+    "description": "A description for 'PCTime.atZone(ZoneId.systemDefault())'"
+  },
+  {
+    "name": "spring.datasource.testOnBorrow",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.testOnBorrow'"
+  },
+  {
+    "name": "spring.datasource.testWhileIdle",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.testWhileIdle'"
+  },
+  {
+    "name": "spring.datasource.timeBetweenEvictionRunsMillis",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.timeBetweenEvictionRunsMillis'"
+  },
+  {
+    "name": "spring.datasource.minEvictableIdleTimeMillis",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.minEvictableIdleTimeMillis'"
+  },
+  {
+    "name": "spring.datasource.validationQuery",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.validationQuery'"
+  },
+  {
+    "name": "spring.datasource.max-active",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.max-active'"
+  },
+  {
+    "name": "spring.datasource.max-idle",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.max-idle'"
+  },
+  {
+    "name": "spring.datasource.max-wait",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.datasource.max-wait'"
+  }
+]}
