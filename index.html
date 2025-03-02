@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrocure Hospitals - Billing Software</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #5D5CDE;
+            --secondary-color: #4B4A9C;
+            --success-color: #10B981;
+            --danger-color: #EF4444;
+            --warning-color: #F59E0B;
+            --info-color: #3B82F6;
+            --light-bg: #FFFFFF;
+            --dark-bg: #181818;
+            --light-text: #374151;
+            --dark-text: #F3F4F6;
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: var(--dark-bg);
+                color: var(--dark-text);
+            }
+
+            .bg-white {
+                background-color: #1F2937 !important;
+            }
+
+            .border-gray-200 {
+                border-color: #374151 !important;
+            }
+
+            .text-gray-800 {
+                color: #F9FAFB !important;
+            }
+
+            .text-gray-700 {
+                color: #E5E7EB !important;
+            }
+
+            .text-gray-600 {
+                color: #D1D5DB !important;
+            }
+
+            .shadow {
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2) !important;
+            }
+
+            input, select, textarea {
+                background-color: #374151 !important;
+                color: #F3F4F6 !important;
+                border-color: #4B5563 !important;
+            }
+
+            input::placeholder, select::placeholder, textarea::placeholder {
+                color: #9CA3AF !important;
+            }
+
+            .table-row:hover {
+                background-color: #2D3748 !important;
+            }
+        }
+
+        /* Light mode (default) */
+        @media (prefers-color-scheme: light) {
+            body {
+                background-color: var(--light-bg);
+                color: var(--light-text);
+            }
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #6B7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4B5563;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #DC2626;
+        }
+
+        .tab-active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .alert-success {
+            background-color: #D1FAE5;
+            color: #065F46;
+            border-color: #10B981;
+        }
+
+        .alert-danger {
+            background-color: #FEE2E2;
+            color: #B91C1C;
+            border-color: #EF4444;
+        }
+
+        .alert-warning {
+            background-color: #FEF3C7;
+            color: #92400E;
+            border-color: #F59E0B;
+        }
+
+        /* Print styles for bills and reports */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-section, .print-section * {
+                visibility: visible;
+            }
+            .print-section {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Loader Animation */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <div class="ml-2">
+                            <h1 class="text-xl font-bold text-gray-800" style="color: var(--primary-color);">Metrocure Hospitals</h1>
+                            <p class="text-sm text-gray-600">Hospital Management System</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600" id="currentDateTime"></span>
+                        <button id="btnLogout" class="text-sm text-gray-600 hover:text-primary">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Navigation -->
+        <nav class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+                <div class="relative flex items-center justify-between h-16">
+                    <div class="flex items-center overflow-x-auto scrollbar-thin">
+                        <div class="flex space-x-1 sm:space-x-2 px-2">
+                            <button data-tab="dashboard" class="nav-tab px-3 py-2 text-sm font-medium rounded-md tab-active">
+                                <i class="fas fa-chart-line mr-1"></i> Dashboard
+                            </button>
+                            <button data-tab="patient-reg" class="nav-tab px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user-plus mr-1"></i> Registration
+                            </button>
+                            <button data-tab="op-billing" class="nav-tab px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-file-invoice-dollar mr-1"></i> OP Billing
+                            </button>
+                            <button data-tab="ip-management" class="nav-tab px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-procedures mr-1"></i> IP Management
+                            </button>
+                            <button data-tab="services" class="nav-tab px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-cogs mr-1"></i> Services
+                            </button>
+                            <button data-tab="rooms" class="nav-tab px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-door-open mr-1"></i> Rooms
+                            </button>
+                            <button data-tab="reports" class="nav-tab px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-file-alt mr-1"></i> Reports
+                            </button>
+                            <button data-tab="analytics" class="nav-tab px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-chart-bar mr-1"></i> Analytics
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow">
+            <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="tab-content">
+                    <div class="px-4 py-6 sm:px-0">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Dashboard</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <!-- Stats Card 1 -->
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-blue-100">
+                                        <i class="fas fa-user-injured text-blue-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Total Patients</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="total-patients">0</p>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-600">
+                                    <span class="text-green-500"><i class="fas fa-arrow-up"></i> 12%</span> from last month
+                                </p>
+                            </div>
+
+                            <!-- Stats Card 2 -->
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-green-100">
+                                        <i class="fas fa-procedures text-green-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">IP Patients</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="ip-patients">0</p>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-600">
+                                    <span class="text-green-500"><i class="fas fa-arrow-up"></i> 8%</span> from last month
+                                </p>
+                            </div>
+
+                            <!-- Stats Card 3 -->
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-purple-100">
+                                        <i class="fas fa-clipboard-check text-purple-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Today's Bills</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="today-bills">0</p>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-600">
+                                    <span class="text-green-500"><i class="fas fa-arrow-up"></i> 5%</span> from yesterday
+                                </p>
+                            </div>
+
+                            <!-- Stats Card 4 -->
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-yellow-100">
+                                        <i class="fas fa-rupee-sign text-yellow-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Revenue (Today)</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="today-revenue">₹0</p>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-600">
+                                    <span class="text-red-500"><i class="fas fa-arrow-down"></i> 3%</span> from yesterday
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                            <!-- Revenue Chart -->
+                            <div class="bg-white rounded-lg shadow p-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Revenue Overview</h3>
+                                <canvas id="revenueChart" height="250"></canvas>
+                            </div>
+
+                            <!-- Patient Distribution Chart -->
+                            <div class="bg-white rounded-lg shadow p-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Patient Distribution</h3>
+                                <canvas id="patientChart" height="250"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-800">Recent Activities</h3>
+                            </div>
+                            <div class="p-4">
+                                <ul class="divide-y divide-gray-200" id="recent-activities">
+                                    <li class="py-3">Loading activities...</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Registration Section -->
+                <div id="patient-reg" class="tab-content hidden">
+                    <div class="px-4 py-6 sm:px-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-800">Patient Registration</h2>
+                            <button id="btnNewPatient" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-plus mr-1"></i> New Patient
+                            </button>
+                        </div>
+
+                        <!-- Search & Filter -->
+                        <div class="bg-white rounded-lg shadow mb-6">
+                            <div class="p-4">
+                                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                                    <div class="flex-grow">
+                                        <div class="relative">
+                                            <input type="text" id="searchPatient" placeholder="Search by ID, Name or Phone..." class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <span class="absolute right-3 top-2 text-gray-400">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <select id="filterPatientType" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <option value="all">All Patients</option>
+                                            <option value="ip">IP Only</option>
+                                            <option value="op">OP Only</option>
+                                        </select>
+                                        <button id="btnSearchPatient" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Patients List -->
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age/Gender</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reg. Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="patientTableBody">
+                                        <tr>
+                                            <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-600">Loading patients...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Showing <span class="font-medium" id="patientsShowing">0</span> of <span class="font-medium" id="patientsTotal">0</span> patients
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="patientsPrevPage">
+                                                <span class="sr-only">Previous</span>
+                                                <i class="fas fa-chevron-left text-xs"></i>
+                                            </button>
+                                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700" id="patientsPagination">
+                                                Page <span id="patientsCurrentPage">1</span>
+                                            </span>
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="patientsNextPage">
+                                                <span class="sr-only">Next</span>
+                                                <i class="fas fa-chevron-right text-xs"></i>
+                                            </button>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OP Billing Section -->
+                <div id="op-billing" class="tab-content hidden">
+                    <div class="px-4 py-6 sm:px-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-800">Outpatient Billing</h2>
+                            <button id="btnNewOPBill" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-plus mr-1"></i> New OP Bill
+                            </button>
+                        </div>
+
+                        <!-- Search & Filter -->
+                        <div class="bg-white rounded-lg shadow mb-6">
+                            <div class="p-4">
+                                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                                    <div class="flex-grow">
+                                        <div class="relative">
+                                            <input type="text" id="searchOPBill" placeholder="Search by Bill ID, Patient ID or Name..." class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <span class="absolute right-3 top-2 text-gray-400">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <input type="date" id="filterOPBillDate" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                        <button id="btnSearchOPBill" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OP Bills List -->
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bill No</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amt</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="opBillTableBody">
+                                        <tr>
+                                            <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-600">Loading bills...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Showing <span class="font-medium" id="opBillsShowing">0</span> of <span class="font-medium" id="opBillsTotal">0</span> bills
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="opBillsPrevPage">
+                                                <span class="sr-only">Previous</span>
+                                                <i class="fas fa-chevron-left text-xs"></i>
+                                            </button>
+                                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700" id="opBillsPagination">
+                                                Page <span id="opBillsCurrentPage">1</span>
+                                            </span>
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="opBillsNextPage">
+                                                <span class="sr-only">Next</span>
+                                                <i class="fas fa-chevron-right text-xs"></i>
+                                            </button>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IP Management Section -->
+                <div id="ip-management" class="tab-content hidden">
+                    <div class="px-4 py-6 sm:px-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-800">Inpatient Management</h2>
+                            <button id="btnNewIPAdmission" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-plus mr-1"></i> New Admission
+                            </button>
+                        </div>
+
+                        <!-- Search & Filter -->
+                        <div class="bg-white rounded-lg shadow mb-6">
+                            <div class="p-4">
+                                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                                    <div class="flex-grow">
+                                        <div class="relative">
+                                            <input type="text" id="searchIPPatient" placeholder="Search by ID, Name or Room..." class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <span class="absolute right-3 top-2 text-gray-400">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <select id="filterIPStatus" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <option value="all">All Status</option>
+                                            <option value="admitted">Admitted</option>
+                                            <option value="discharged">Discharged</option>
+                                        </select>
+                                        <button id="btnSearchIPPatient" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- IP Patients List -->
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP No</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient ID</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admit Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Days</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bill Amount</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="ipPatientTableBody">
+                                        <tr>
+                                            <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-600">Loading patients...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Showing <span class="font-medium" id="ipPatientsShowing">0</span> of <span class="font-medium" id="ipPatientsTotal">0</span> patients
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="ipPatientsPrevPage">
+                                                <span class="sr-only">Previous</span>
+                                                <i class="fas fa-chevron-left text-xs"></i>
+                                            </button>
+                                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700" id="ipPatientsPagination">
+                                                Page <span id="ipPatientsCurrentPage">1</span>
+                                            </span>
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="ipPatientsNextPage">
+                                                <span class="sr-only">Next</span>
+                                                <i class="fas fa-chevron-right text-xs"></i>
+                                            </button>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Management Section -->
+                <div id="services" class="tab-content hidden">
+                    <div class="px-4 py-6 sm:px-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-800">Services Management</h2>
+                            <button id="btnNewService" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-plus mr-1"></i> Add New Service
+                            </button>
+                        </div>
+
+                        <!-- Search & Filter -->
+                        <div class="bg-white rounded-lg shadow mb-6">
+                            <div class="p-4">
+                                <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                                    <div class="flex-grow">
+                                        <div class="relative">
+                                            <input type="text" id="searchService" placeholder="Search by Service Name or Code..." class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <span class="absolute right-3 top-2 text-gray-400">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <select id="filterServiceType" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <option value="all">All Types</option>
+                                            <option value="consultation">Consultation</option>
+                                            <option value="procedure">Procedure</option>
+                                            <option value="laboratory">Laboratory</option>
+                                            <option value="radiology">Radiology</option>
+                                            <option value="pharmacy">Pharmacy</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <button id="btnSearchService" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Services List -->
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Code</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate (₹)</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="serviceTableBody">
+                                        <tr>
+                                            <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-600">Loading services...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Showing <span class="font-medium" id="servicesShowing">0</span> of <span class="font-medium" id="servicesTotal">0</span> services
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="servicesPrevPage">
+                                                <span class="sr-only">Previous</span>
+                                                <i class="fas fa-chevron-left text-xs"></i>
+                                            </button>
+                                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700" id="servicesPagination">
+                                                Page <span id="servicesCurrentPage">1</span>
+                                            </span>
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="servicesNextPage">
+                                                <span class="sr-only">Next</span>
+                                                <i class="fas fa-chevron-right text-xs"></i>
+                                            </button>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rooms Management Section -->
+                <div id="rooms" class="tab-content hidden">
+                    <div class="px-4 py-6 sm:px-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-semibold text-gray-800">Rooms Management</h2>
+                            <button id="btnNewRoom" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-plus mr-1"></i> Add New Room
+                            </button>
+                        </div>
+
+                        <!-- Room Status Overview -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-green-100">
+                                        <i class="fas fa-door-open text-green-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Total Rooms</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="total-rooms">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-blue-100">
+                                        <i class="fas fa-bed text-blue-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Available</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="available-rooms">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-red-100">
+                                        <i class="fas fa-bed text-red-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Occupied</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="occupied-rooms">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-yellow-100">
+                                        <i class="fas fa-broom text-yellow-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Maintenance</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="maintenance-rooms">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Room Type Filters -->
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <button class="px-4 py-2 rounded-md bg-gray-200 text-gray-800 text-sm font-medium room-filter active" data-filter="all">
+                                All Types
+                            </button>
+                            <button class="px-4 py-2 rounded-md bg-gray-200 text-gray-800 text-sm font-medium room-filter" data-filter="general">
+                                General Ward
+                            </button>
+                            <button class="px-4 py-2 rounded-md bg-gray-200 text-gray-800 text-sm font-medium room-filter" data-filter="semi-private">
+                                Semi-Private
+                            </button>
+                            <button class="px-4 py-2 rounded-md bg-gray-200 text-gray-800 text-sm font-medium room-filter" data-filter="private">
+                                Private
+                            </button>
+                            <button class="px-4 py-2 rounded-md bg-gray-200 text-gray-800 text-sm font-medium room-filter" data-filter="deluxe">
+                                Deluxe
+                            </button>
+                            <button class="px-4 py-2 rounded-md bg-gray-200 text-gray-800 text-sm font-medium room-filter" data-filter="suite">
+                                Suite
+                            </button>
+                            <button class="px-4 py-2 rounded-md bg-gray-200 text-gray-800 text-sm font-medium room-filter" data-filter="icu">
+                                ICU
+                            </button>
+                        </div>
+
+                        <!-- Rooms Visual Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-6" id="rooms-grid">
+                            <div class="text-center p-4">Loading rooms...</div>
+                        </div>
+
+                        <!-- Rooms List -->
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room No</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Floor</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate (₹/day)</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Patient</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="roomTableBody">
+                                        <tr>
+                                            <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-600">Loading rooms...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Showing <span class="font-medium" id="roomsShowing">0</span> of <span class="font-medium" id="roomsTotal">0</span> rooms
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="roomsPrevPage">
+                                                <span class="sr-only">Previous</span>
+                                                <i class="fas fa-chevron-left text-xs"></i>
+                                            </button>
+                                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700" id="roomsPagination">
+                                                Page <span id="roomsCurrentPage">1</span>
+                                            </span>
+                                            <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="roomsNextPage">
+                                                <span class="sr-only">Next</span>
+                                                <i class="fas fa-chevron-right text-xs"></i>
+                                            </button>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Section -->
+                <div id="reports" class="tab-content hidden">
+                    <div class="px-4 py-6 sm:px-0">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Reports & Documents</h2>
+
+                        <!-- Reports Tabs -->
+                        <div class="mb-6">
+                            <div class="border-b border-gray-200">
+                                <nav class="flex -mb-px">
+                                    <button data-report-tab="lab-reports" class="report-tab-btn report-tab-active ml-1 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none w-1/3 sm:w-auto sm:px-6">
+                                        <i class="fas fa-flask mr-1"></i> Lab Reports
+                                    </button>
+                                    <button data-report-tab="billing-reports" class="report-tab-btn ml-1 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none w-1/3 sm:w-auto sm:px-6">
+                                        <i class="fas fa-file-invoice-dollar mr-1"></i> Billing Reports
+                                    </button>
+                                    <button data-report-tab="discharge-summaries" class="report-tab-btn ml-1 py-4 px-1 text-center border-b-2 border-transparent font-medium text-sm leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none w-1/3 sm:w-auto sm:px-6">
+                                        <i class="fas fa-notes-medical mr-1"></i> Discharge Summaries
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+
+                        <!-- Lab Reports Tab Content -->
+                        <div id="lab-reports" class="report-tab-content">
+                            <div class="bg-white rounded-lg shadow mb-6">
+                                <div class="p-4">
+                                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                                        <div class="flex-grow">
+                                            <div class="relative">
+                                                <input type="text" id="searchLabReport" placeholder="Search by Patient ID or Name..." class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                                <span class="absolute right-3 top-2 text-gray-400">
+                                                    <i class="fas fa-search"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <input type="date" id="filterLabReportDate" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <button id="btnSearchLabReport" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report ID</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test Name</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Date</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200" id="labReportTableBody">
+                                            <tr>
+                                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-600">Loading lab reports...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Pagination -->
+                                <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-700">
+                                                Showing <span class="font-medium" id="labReportsShowing">0</span> of <span class="font-medium" id="labReportsTotal">0</span> reports
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                                <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="labReportsPrevPage">
+                                                    <span class="sr-only">Previous</span>
+                                                    <i class="fas fa-chevron-left text-xs"></i>
+                                                </button>
+                                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700" id="labReportsPagination">
+                                                    Page <span id="labReportsCurrentPage">1</span>
+                                                </span>
+                                                <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="labReportsNextPage">
+                                                    <span class="sr-only">Next</span>
+                                                    <i class="fas fa-chevron-right text-xs"></i>
+                                                </button>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Billing Reports Tab Content -->
+                        <div id="billing-reports" class="report-tab-content hidden">
+                            <div class="bg-white rounded-lg shadow mb-6">
+                                <div class="p-4">
+                                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                                        <div class="flex-grow">
+                                            <div class="relative">
+                                                <input type="text" id="searchBillingReport" placeholder="Search by Bill ID or Patient Name..." class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                                <span class="absolute right-3 top-2 text-gray-400">
+                                                    <i class="fas fa-search"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                                            <div class="flex space-x-2">
+                                                <select id="filterBillType" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                                    <option value="all">All Bills</option>
+                                                    <option value="ip">IP Bills</option>
+                                                    <option value="op">OP Bills</option>
+                                                    <option value="pharmacy">Pharmacy</option>
+                                                </select>
+                                                <input type="date" id="filterBillingDate" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            </div>
+                                            <button id="btnSearchBillingReport" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bill No</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200" id="billingReportTableBody">
+                                            <tr>
+                                                <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-600">Loading billing reports...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Pagination -->
+                                <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-700">
+                                                Showing <span class="font-medium" id="billingReportsShowing">0</span> of <span class="font-medium" id="billingReportsTotal">0</span> reports
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                                <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="billingReportsPrevPage">
+                                                    <span class="sr-only">Previous</span>
+                                                    <i class="fas fa-chevron-left text-xs"></i>
+                                                </button>
+                                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700" id="billingReportsPagination">
+                                                    Page <span id="billingReportsCurrentPage">1</span>
+                                                </span>
+                                                <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="billingReportsNextPage">
+                                                    <span class="sr-only">Next</span>
+                                                    <i class="fas fa-chevron-right text-xs"></i>
+                                                </button>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Discharge Summaries Tab Content -->
+                        <div id="discharge-summaries" class="report-tab-content hidden">
+                            <div class="bg-white rounded-lg shadow mb-6">
+                                <div class="p-4">
+                                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                                        <div class="flex-grow">
+                                            <div class="relative">
+                                                <input type="text" id="searchDischargeSummary" placeholder="Search by Patient ID or Name..." class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                                <span class="absolute right-3 top-2 text-gray-400">
+                                                    <i class="fas fa-search"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <input type="date" id="filterDischargeDate" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <button id="btnSearchDischargeSummary" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP No</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admit Date</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discharge Date</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Primary Diagnosis</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200" id="dischargeSummaryTableBody">
+                                            <tr>
+                                                <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-600">Loading discharge summaries...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Pagination -->
+                                <div class="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-700">
+                                                Showing <span class="font-medium" id="dischargeSummariesShowing">0</span> of <span class="font-medium" id="dischargeSummariesTotal">0</span> summaries
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                                <button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="dischargeSummariesPrevPage">
+                                                    <span class="sr-only">Previous</span>
+                                                    <i class="fas fa-chevron-left text-xs"></i>
+                                                </button>
+                                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700" id="dischargeSummariesPagination">
+                                                    Page <span id="dischargeSummariesCurrentPage">1</span>
+                                                </span>
+                                                <button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" id="dischargeSummariesNextPage">
+                                                    <span class="sr-only">Next</span>
+                                                    <i class="fas fa-chevron-right text-xs"></i>
+                                                </button>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="analytics" class="tab-content hidden">
+                    <div class="px-4 py-6 sm:px-0">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Financial Analytics</h2>
+
+                        <!-- Time Period Selector -->
+                        <div class="bg-white rounded-lg shadow mb-6">
+                            <div class="p-4">
+                                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                                    <div class="flex space-x-2 items-center">
+                                        <label for="analyticsDateRange" class="text-sm font-medium text-gray-700">Period:</label>
+                                        <select id="analyticsDateRange" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                            <option value="today">Today</option>
+                                            <option value="yesterday">Yesterday</option>
+                                            <option value="thisweek">This Week</option>
+                                            <option value="lastweek">Last Week</option>
+                                            <option value="thismonth" selected>This Month</option>
+                                            <option value="lastmonth">Last Month</option>
+                                            <option value="thisyear">This Year</option>
+                                            <option value="custom">Custom Range</option>
+                                        </select>
+                                    </div>
+                                    <div id="customDateRange" class="flex space-x-2 items-center hidden">
+                                        <label for="analyticsStartDate" class="text-sm font-medium text-gray-700">From:</label>
+                                        <input type="date" id="analyticsStartDate" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                        <label for="analyticsEndDate" class="text-sm font-medium text-gray-700">To:</label>
+                                        <input type="date" id="analyticsEndDate" class="rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base">
+                                    </div>
+                                    <button id="btnUpdateAnalytics" class="btn-primary px-4 py-2 rounded-md text-sm font-medium">
+                                        Update
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Summary Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-indigo-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-indigo-100">
+                                        <i class="fas fa-chart-line text-indigo-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Total Billed</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="total-billed">₹0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-green-100">
+                                        <i class="fas fa-money-bill-wave text-green-500"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Total Received</p>
+                                        <p class="text-2xl font-semibold text-gray-800" id="total-received">₹0</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 rounded-full p-3 bg-red-100">
